@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="FlowAISystem.Core/FlowAISystem.Core.csproj" />
+  <Project Path="FlowAISystem.Data/FlowAISystem.Data.csproj" />
+  <Project Path="FlowAISystem.WebApp/FlowAISystem.WebApp.csproj" />
+</Solution>
