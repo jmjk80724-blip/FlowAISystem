@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace FlowAISystem.Data.DTOs.Student
+namespace FlowAISystem.Data.DTOs.Subject
 {
-    public class SubjectReponseDto
+    public class SubjectResponseDto
     {
         public int Id {get; set;} 
         public string SubjectName {get; set;}
