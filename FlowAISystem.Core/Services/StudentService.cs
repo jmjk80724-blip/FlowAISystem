@@ -8,15 +8,15 @@ using FlowAISystem.Core.Exceptions;
 
 namespace FlowAISystem.Core.Services
 {
-    public class StudentService : IStudentService
+    public class StudentService : IStudentService // Anstration in oop
     {
-        private readonly AppDbContext _context;
+        private readonly AppDbContext _context;  /// call AppDbContext
 
         public StudentService( AppDbContext context)
         {
             _context = context;
         }
-        public async Task<List<StudentResponseDto>> GetAllAsync()
+        public async Task<List<StudentResponseDto>> GetAllAsync() // Abstartion by Interface IStudent Task
         {
             return await _context.Students
                 .Select(s => new StudentResponseDto

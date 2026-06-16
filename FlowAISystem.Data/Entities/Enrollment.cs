@@ -23,7 +23,7 @@ namespace FlowAISystem.Data.Entities
       [Required]
       [Range(2000, 2100)]
       public int Year { get; set; }
-      public DateTime EnrollmentDate { get; set; } = DateTime.Now;
+      public DateTime EnrolledAt { get; set; } = DateTime.Now;
 
       // Navigation properties
         public Student Student { get; set; } 

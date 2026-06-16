@@ -18,6 +18,6 @@ namespace FlowAISystem.Data.DTOs.Enrollment
 
         public int Year { get; set; }
 
-        public DateTime EnrollmentAt { get; set; }
+        public DateTime EnrolledAt { get; set; }
     }
 }
