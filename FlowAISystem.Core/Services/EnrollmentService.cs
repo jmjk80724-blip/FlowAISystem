@@ -19,7 +19,7 @@ namespace FlowAISystem.Core.Services
             _context = context;
         }
 
-        public async Task<List<EnrollmentReponseDto>> GetAllAsynce ()
+        public async Task<List<EnrollmentReponseDto>> GetAllAsync()
         {
             return await _context.Enrollments
             .Include( e => e.Student)
