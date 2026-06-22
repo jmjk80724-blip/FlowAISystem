@@ -36,9 +36,9 @@ namespace FlowAISystem.Core.Services
         {
             var student = await _context.Students.FindAsync(id);
 
-            if (student = null)
+            if (student == null)
             
-                throw new NotFountException($"Student {id} not found");
+                throw new NotFoundException($"Student {id} not found");
                 return new StudentResponseDto
                 {
                     Id = student.Id,
@@ -47,7 +47,7 @@ namespace FlowAISystem.Core.Services
                     Email = student.Email,
                     PhoneNumber = student.PhoneNumber,
                     DateOfBirth = student.DateOfBirth,
-                    CreateAt = student.CreateAt
+                    CreateAt = student.CreatedAt
                 };
             
         }
@@ -83,8 +83,8 @@ namespace FlowAISystem.Core.Services
         {
             var student = await _context.Students.FindAsync(id);
 
-            if (student = null)
-            throw new NotFountException($"Student {id} not found");
+            if (student == null)
+            throw new NotFoundException($"Student {id} not found");
 
             student.FullName = dto.FullName ?? student.FullName;
             student.Gender = dto.Gender ?? student.Gender;
@@ -96,8 +96,8 @@ namespace FlowAISystem.Core.Services
         {
             var student = await _context.Students.FindAsync(id);
 
-            if(student= null) 
-            throw  new NotFountException($"Student {id} Not found");
+            if(student== null) 
+            throw  new NotFoundException($"Student {id} Not found");
 
             _context.Students.Remove(student);
             await _context.SaveChangesAsync();

@@ -24,9 +24,9 @@ namespace FlowAISystem.Data.Entities
         public string Recommendation { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         // Navigation property
-        public Enrollment Enrollment { get; set; }
-        public AIModel AIModel { get; set; }
-        public Feedback Feedback { get; set; }
-        public ICollection<PredictionLog> PredictionLogs { get; set; }
+        public Enrollment? Enrollment { get; set; }
+        public AIModel? AIModel { get; set; }
+        public Feedback? Feedback { get; set; }
+        public ICollection<PredictionLog>? PredictionLogs { get; set; }
     }
 }

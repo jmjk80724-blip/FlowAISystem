@@ -1,8 +1,9 @@
 
 namespace FlowAISystem.Core.Exceptions
 {
-    public class ValidationException : Exception
+    public class FlowValidationException : Exception
     {
-        public ValidationException( string message): base {}
+        public FlowValidationException(string message)
+            : base(message) { }
     }
 }

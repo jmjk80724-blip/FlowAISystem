@@ -1,7 +1,122 @@
-﻿@page "/"
+﻿@page "/dashboard"
+@using FlowAISystem.Core.Services.Interface
 
-<PageTitle>Home</PageTitle>
+@inject IStudentService StudentService
+@inject ISubjectService SubjectService
+@inject IPredictionService PredictionService
+@inject NavigationManager Navigation
 
-<h1>Hello, world!</h1>
+<div class="container mt-4">
 
-Welcome to your new app.
+    <h2 class="mb-4"> Dashboard — FlowAI System</h2>
+
+    @* Stats Cards *@
+    <div class="row mb-4">
+
+        <div class="col-md-3">
+            <div class="card bg-primary text-white text-center p-3">
+                <h2>@totalStudents</h2>
+                <p>Total Students</p>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-success text-white text-center p-3">
+                <h2>@totalSubjects</h2>
+                <p>Total Subjects</p>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-warning text-white text-center p-3">
+                <h2>@totalPredictions</h2>
+                <p>Total Predictions</p>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-danger text-white text-center p-3">
+                <h2>@passRate%</h2>
+                <p>Pass Rate</p>
+            </div>
+        </div>
+
+    </div>
+
+    @* Recent Predictions *@
+    <div class="card">
+        <div class="card-header">
+            <h5>Recent Predictions</h5>
+        </div>
+        <div class="card-body">
+            @if (predictions == null)
+            {
+                <p>Loading...</p>
+            }
+            else if (!predictions.Any())
+            {
+                <p>No predictions yet.</p>
+            }
+            else
+            {
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Subject</th>
+                            <th>Average</th>
+                            <th>Result</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var p in predictions.Take(5))
+                        {
+                            <tr>
+                                <td>@p.StudentName</td>
+                                <td>@p.SubjectName</td>
+                                <td>@p.AverageScore.ToString("F2")</td>
+                                <td>
+                                    @if (p.Result == "Pass")
+                                    {
+                                        <span class="badge bg-success">Pass</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Fail</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+
+</div>
+
+@code {
+    private int totalStudents;
+    private int totalSubjects;
+    private int totalPredictions;
+    private double passRate;
+    private List<PredictionResponseDto> predictions;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var students    = await StudentService.GetAllAsync();
+        var subjects    = await SubjectService.GetAllAsync();
+        predictions     = await PredictionService.GetAllAsync();
+
+        totalStudents    = students.Count;
+        totalSubjects    = subjects.Count;
+        totalPredictions = predictions.Count;
+
+        //  Pass Rate
+        if (predictions.Any())
+        {
+            var passed = predictions.Count(p => p.Result == "Pass");
+            passRate   = Math.Round((double)passed / totalPredictions * 100, 1);
+        }
+    }
+}

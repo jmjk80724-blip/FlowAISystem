@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace FlowAISystem.Data.DTOs.Feedback
 {
-    public class FeedbackResponsDto
+    public class FeedbackResponseDto
     {
         public int Id {get; set;}
         public int PredictionId { get; set; }

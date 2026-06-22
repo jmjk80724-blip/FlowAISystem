@@ -46,7 +46,7 @@ namespace FlowAISystem.Core.Services
             .FirstOrDefaultAsync( e => e.Id == id);
 
             if(enrollment == null)
-            throw new NotFountException($"Enrollment {id} not found");
+            throw new NotFoundException($"Enrollment {id} not found");
 
             return new EnrollmentReponseDto
             {
@@ -68,13 +68,13 @@ namespace FlowAISystem.Core.Services
             var student = await _context.Students.FindAsync(dto.StudentId);
 
             if(student == null)
-            throw new NotFountException($"Student {dto.StudentId} not found");
+            throw new NotFoundException($"Student {dto.StudentId} not found");
 
             // Validate Subject exists
             var subject = await _context.Subjects.FindAsync(dto.SubjectId);
             
             if (subject ==null)
-            throw new NotFountException($"Subject {dto.SubjectId} not found");
+            throw new NotFoundException($"Subject {dto.SubjectId} not found");
 
             var exists = await _context.Enrollments 
             .AnyAsync( e =>
@@ -115,8 +115,8 @@ namespace FlowAISystem.Core.Services
         {
             var enrollment = await _context.Enrollments.FindAsync(id);
 
-            if (enrollment = null) 
-            throw new NotFountException($"Enrollment {id} not found");
+            if (enrollment == null) 
+            throw new NotFoundException($"Enrollment {id} not found");
 
             _context.Enrollments.Remove(enrollment);
             await _context.SaveChangesAsync();

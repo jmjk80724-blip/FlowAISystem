@@ -1,6 +1,3 @@
-
-
-using System.Security.Cryptography.X509Certificates;
 using FlowAISystem.Core.Exceptions;
 using FlowAISystem.Core.Services.Interfaces;
 using FlowAISystem.Data;
@@ -14,115 +11,115 @@ namespace FlowAISystem.Core.Services
     {
         private readonly AppDbContext _context;
 
-        public PredictionService (AppDbContext context)
+        public PredictionService(AppDbContext context)
         {
-            _context = context ;
+            _context = context;
         }
 
-    public async Task<List<PredictionResponseDto>> GetAllAsync()
+        public async Task<List<PredictionResponseDto>> GetAllAsync()
         {
             return await _context.Predictions
-            .Include( p => p.Enrollment)
-              .ThenInclude( e => e.Student)
-            .Include( p => p.Enrollment)
-              .ThenInclude ( e => e.Subject)
-            .Include(p => p.AIModel)
-            .Select( p => new PredictionResponseDto
-            {
-                Id = p.Id,
-                EnrollmentId = p.EnrollmentId,
-                StudentName = p.Enrollment.Student.FullName,
-                SubjectName = p.Enrollment.Subject.SubjectName,
-                AverageScore = p.AverageScore,
-                Result = p.Result,
-                Recommendation = p.Recommendation,
-                AIModelName = p.AIModel.ModelName,
-                CreatedAt = p.CreatedAt
-            })
-              .ToListAsync();
+                .Include(p => p.Enrollment)
+                    .ThenInclude(e => e.Student)
+                .Include(p => p.Enrollment)
+                    .ThenInclude(e => e.Subject)
+                .Include(p => p.AIModel)
+                .Select(p => new PredictionResponseDto
+                {
+                    Id             = p.Id,
+                    EnrollmentId   = p.EnrollmentId,
+                    StudentName    = p.Enrollment.Student.FullName,
+                    SubjectName    = p.Enrollment.Subject.SubjectName,
+                    AverageScore   = p.AverageScore,
+                    Result         = p.Result,
+                    Recommendation = p.Recommendation,
+                    AIModelName    = p.AIModel.ModelName,
+                    CreatedAt      = p.CreatedAt
+                })
+                .ToListAsync();
         }
-    public async Task<PredictionResponseDto> GetByEnrollmentIdAsynce(int enrollmentId)
+
+        public async Task<PredictionResponseDto> GetByEnrollmentIdAsync(int enrollmentId)
         {
             var prediction = await _context.Predictions
-            .Include(p => p.Enrollment)
-               .ThenInclude( e => e.Student)
-            .Include( p => p.Enrollment)
-               .ThenInclude( e => e.Subject)
-            .Include( p => p.AIModel)
-            .FirstOrDefaultAsync( p => p.EnrollmentId == enrollmentId);
+                .Include(p => p.Enrollment)
+                    .ThenInclude(e => e.Student)
+                .Include(p => p.Enrollment)
+                    .ThenInclude(e => e.Subject)
+                .Include(p => p.AIModel)
+                .FirstOrDefaultAsync(p => p.EnrollmentId == enrollmentId);
 
-            if(prediction == null)
-            throw new NotFountException($"Prediction for Enrollment {enrollmentId} not found");
+            if (prediction == null)
+                throw new NotFoundException($"Prediction for Enrollment {enrollmentId} not found");
 
             return new PredictionResponseDto
             {
-                Id = prediction.Id,
-                EnrollmentId = prediction.EnrollmentId,
-                StudentName = prediction.Enrollment.Student.FullName,
-                SubjectName = prediction.Enrollment.Subject.SubjectName,
-                AverageScore = prediction.AverageScore,
-                Result = prediction.Result,
-                Recommendation = prediction.Recommentdation,
-                AIModelName = prediction.AIModel.ModelName,
-                CreatedAt = prediction.CreatedAt
+                Id             = prediction.Id,
+                EnrollmentId   = prediction.EnrollmentId,
+                StudentName    = prediction.Enrollment.Student.FullName,
+                SubjectName    = prediction.Enrollment.Subject.SubjectName,
+                AverageScore   = prediction.AverageScore,
+                Result         = prediction.Result,
+                Recommendation = prediction.Recommendation,
+                AIModelName    = prediction.AIModel.ModelName,
+                CreatedAt      = prediction.CreatedAt
             };
         }
-    
-    public async Task<PredictionResponseDto> PredictAsync(PredictionRequestDto dto)
+
+        public async Task<PredictionResponseDto> PredictAsync(PredictionRequestDto dto)
         {
-            // 1. Validate enrollment
+            // ១. Validate Enrollment
             var enrollment = await _context.Enrollments
-            .Include( e => e.Student) 
-            .Include( e => e.Subject)
-            .FirstOrDefaultAsync( e => e.Id == dto.EnrollmentId);
+                .Include(e => e.Student)
+                .Include(e => e.Subject)
+                .FirstOrDefaultAsync(e => e.Id == dto.EnrollmentId);
 
-            if(enrollment==null) 
-            throw new NotFountException($"Enrollment {dto.EnrollmentId} not found");
+            if (enrollment == null)
+                throw new NotFoundException($"Enrollment {dto.EnrollmentId} not found");
 
-            // 2. Find All Score in
+            // ២. រក Scores ទាំងអស់
+            var scores = await _context.Scores
+                .Where(s => s.EnrollmentId == dto.EnrollmentId)
+                .ToListAsync();
 
-            var score = await _context.Scores
-            .Where( s => s.EnrollmentId == dto.EnrollmentId)
-            .ToListAsync();
+            if (!scores.Any())
+                throw new NotFoundException("No scores found for this enrollment");
 
-            if(!score.Any())
-            throw new NotFountException("Nor score found for this enrollment");
-            
-            // 3. Weighted Average
-            double average = CalculateWeightedAverage(score);
+            // ៣. គណនា Weighted Average
+            double average = CalculateWeightedAverage(scores);
 
-            // 4. Predict Result
-            string result = average >= 50 ? "Pass" : "Fail";
-            string recommentdation = GetRecommentdation(average);
+            // ៤. Predict Result
+            string result         = average >= 50 ? "Pass" : "Fail";
+            string recommendation = GetRecommendation(average);
 
-            // 5. Find must new AIModel 
+            // ៥. រក AIModel
             var aiModel = await _context.AIModels
-            .OrderByDescending( m => m.TrainedAt)
-            .FirstOrDefaultAsync();
+                .OrderByDescending(m => m.TrainedAt)
+                .FirstOrDefaultAsync();
 
             if (aiModel == null)
-            throw new DllNotFoundException("No AIModel found");
+                throw new NotFoundException("No AI Model found");
 
-            // 6. Save Prediction 
+            // ៦. Save Prediction
             var prediction = new Prediction
             {
-                EnrollmentId = dto.EnrollmentId,
-                AIModelId = aiModel.Id,
-                AverageScore = average,
-                Result = result,
-                Recommendation = recommentdation
+                EnrollmentId   = dto.EnrollmentId,
+                AIModelId      = aiModel.Id,
+                AverageScore   = average,
+                Result         = result,
+                Recommendation = recommendation
             };
+
             _context.Predictions.Add(prediction);
 
-            // 7. Save PredictionLog
-
+            // ៧. Save PredictionLog
             var log = new PredictionLog
             {
-                AIModelId = aiModel.Id,
+                AIModelId    = aiModel.Id,
                 PredictionId = prediction.Id,
-                Input = $"EnrollmentId: {dto.EnrollmentId}",
-                Output = $"Result: {result} : Average:{average}",
-                Confidence= average/100
+                Input        = $"EnrollmentId: {dto.EnrollmentId}",
+                Output       = $"Result: {result}, Average: {average}",
+                Confidence   = average / 100
             };
 
             _context.PredictionLogs.Add(log);
@@ -130,56 +127,52 @@ namespace FlowAISystem.Core.Services
 
             return new PredictionResponseDto
             {
-                Id = prediction.Id,
-                EnrollmentId = prediction.EnrollmentId,
-                  StudentName    = enrollment.Student.FullName,
+                Id             = prediction.Id,
+                EnrollmentId   = prediction.EnrollmentId,
+                StudentName    = enrollment.Student.FullName,
                 SubjectName    = enrollment.Subject.SubjectName,
                 AverageScore   = Math.Round(average, 2),
                 Result         = result,
-                Recommendation = recommentdation,
+                Recommendation = recommendation,
                 AIModelName    = aiModel.ModelName,
                 CreatedAt      = prediction.CreatedAt
             };
         }
-    
-    //  ------Private Helper Methods -----------
 
-    private double CalculateWeightedAverage(List<Score> scores)
+        // ── Private Helper Methods ──────────────────────
+
+        private double CalculateWeightedAverage(List<Score> scores)
         {
-            double assignment = scores 
-            .Where( s => s.ScoreType == "Assignment")
-            .Select (s => s.Value)
-            .DefaultIfEmpty(0)
-            .Average() * 0.30;
+            double assignment = scores
+                .Where(s => s.ScoreType == "Assignment")
+                .Select(s => s.Value)
+                .DefaultIfEmpty(0)
+                .Average() * 0.30;
 
             double midterm = scores
-            .Where( s => s.ScoreType == "Midterm")
-            .Select (s => s.Value)
-            .DefaultIfEmpty(0)
-            .Average() * 0.30;
+                .Where(s => s.ScoreType == "Midterm")
+                .Select(s => s.Value)
+                .DefaultIfEmpty(0)
+                .Average() * 0.30;
 
-            double final = scores 
-            .Where( s => s.ScoreType == "Final")
-            .Select (s => s.Value)
-            .DefaultIfEmpty(0)
-            .Average() * 0.40;
+            double final = scores
+                .Where(s => s.ScoreType == "Final")
+                .Select(s => s.Value)
+                .DefaultIfEmpty(0)
+                .Average() * 0.40;
 
-        return assignment + midterm + final ;
-
+            return assignment + midterm + final;
         }
 
-    public string GetRecommentdation(double average)
+        private string GetRecommendation(double average)
         {
             return average switch
             {
-                >= 80 => "Excellment! Keep it up!",
+                >= 80 => "Excellent! Keep it up!",
                 >= 70 => "Good! Try harder!",
-                >= 50 => "Pass but new improvement!",
-                _     => "False! Need more study! "
+                >= 50 => "Pass but need improvement!",
+                _     => "Fail! Need more study!"
             };
         }
-
-
-        
     }
-} 
+}

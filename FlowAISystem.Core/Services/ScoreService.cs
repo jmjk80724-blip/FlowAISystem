@@ -37,31 +37,34 @@ namespace FlowAISystem.Core.Services
              .ToListAsync();
         }
     
-    public async Task<List<ScoreCreateDto>> GetIdEnrollmentIdAsync ( int enrollmentId)
+    public async Task<List<ScoreResponseDto>> GetAllAsync(int enrollmentId)
+{
+    var enrollment = await _context.Enrollments
+        .Include(e => e.Student)
+        .Include(e => e.Subject)
+        .FirstOrDefaultAsync(e => e.Id == enrollmentId);
+
+    if (enrollment == null)
+        throw new NotFoundException($"Enrollment {enrollmentId} not found");
+
+    return await _context.Scores
+        .Where(s => s.EnrollmentId == enrollmentId)
+        .Include(s => s.Enrollment)
+            .ThenInclude(e => e.Student)
+        .Include(s => s.Enrollment)
+            .ThenInclude(e => e.Subject)
+        .Select(s => new ScoreResponseDto
         {
-            var enrollment = await _context.Enrollments.FindAsync(enrollmentId);
-
-            if (enrollment==null)
-            throw new NotFiniteNumberException($"Enrollment {enrollmentId} not found");
-
-            return await _context.Scores 
-            .Where( s => s.EnrollmentId == enrollmentId)
-            .Include ( s => s.Enrollment)
-            .ThenInclude( e => e.Student)
-            .Include ( s => s.Enrollment)
-            .ThenInclude (e => e.Subject)
-            .Select (s => new ScoreResponseDto
-            {
-                Id = s.Id,
-                EnrollmentId = s.EnrollmentId,
-                StudentName = s.Enrollment.Student.FullName,
-                SubjectName = s.Enrollment.Subject.SubjectName,
-                ScoreType = s.ScoreType,
-                Value = s.Value,
-                CreatedAt = s.CreatedAt
-            }) 
-             .ToListAsync();
-        }
+            Id = s.Id,
+            EnrollmentId = s.EnrollmentId,
+            StudentName = s.Enrollment.Student.FullName,
+            SubjectName = s.Enrollment.Subject.SubjectName,
+            ScoreType = s.ScoreType,
+            Value = s.Value,
+            CreatedAt = s.CreatedAt
+        })
+        .ToListAsync();
+}
     public async Task<ScoreResponseDto> CreateAsync( ScoreCreateDto dto)
         {
             var enrollment = await _context.Enrollments
@@ -71,7 +74,7 @@ namespace FlowAISystem.Core.Services
 
              
             if (enrollment == null) 
-            throw  new NotFountException($"Enrollment {dto.EnrollmentId} not found");
+            throw  new NotFoundException($"Enrollment {dto.EnrollmentId} not found");
 
             var exists = await _context.Scores
             .AnyAsync( s=> 
@@ -107,9 +110,9 @@ namespace FlowAISystem.Core.Services
             var score = await _context.Scores.FindAsync(id);
 
             if(score == null) 
-            throw new NotFountException($"Score {id} not found");
+            throw new NotFoundException($"Score {id} not found");
 
-            score.Valus = dto.Value;
+            score.Value = dto.Value;
 
             await _context.SaveChangesAsync();
         }
@@ -119,7 +122,7 @@ namespace FlowAISystem.Core.Services
             var score  = await _context.Scores.FindAsync(id);
 
             if (score==null)
-            throw new NotFountException($"Score {id} not found");
+            throw new NotFoundException($"Score {id} not found");
 
             _context.Scores.Remove(score);
             await _context.SaveChangesAsync();

@@ -33,15 +33,15 @@ namespace FlowAISystem.Core.Services
         {
             var subject = await _context.Subjects.FindAsync(id);
 
-            if (subject = null)
-            throw new NotFountException($"Subject {id} Notfound");
+            if (subject == null)
+            throw new NotFoundException($"Subject {id} Notfound");
             
             return new SubjectResponseDto
             {
                 Id = subject.Id,
                 SubjectName = subject.SubjectName,
                 Credits = subject.Credits,
-                Description = subject.Decription
+                Description = subject.Description
             };
         } 
         public async Task<SubjectResponseDto> CreateAsync(SubjectCreateDto dto)
@@ -75,12 +75,12 @@ namespace FlowAISystem.Core.Services
         {
             var subject =  await _context.Subjects.FindAsync(id);
 
-            if(subject = null) 
-            throw new NotFountException($"Subject {id} not found");
+            if(subject == null) 
+            throw new NotFoundException($"Subject {id} not found");
 
-            subject.SubjectName = dto.SubjectName ?? subject.subjectName;
+            subject.SubjectName = dto.SubjectName ?? subject.SubjectName;
             subject.Credits = dto.Credits !=0 ? dto.Credits : subject.Credits;
-            subject.Decription = dto.Description ?? subject.Decription;
+            subject.Description = dto.Description ?? subject.Description;
 
             await _context.SaveChangesAsync();
         }
@@ -88,8 +88,8 @@ namespace FlowAISystem.Core.Services
         {
             var subject = await _context.Subjects.FindAsync(id);
 
-            if(subject = null)
-             throw new NotFountException($"Subject {id} not found");
+            if(subject == null)
+             throw new NotFoundException($"Subject {id} not found");
 
             _context.Subjects.Remove(subject);
             await _context.SaveChangesAsync();

@@ -1,0 +1,81 @@
+@page "/login"
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+
+<div class="container mt -5">
+    <div class="row justrify-conten-center">
+        <div class="col-md-4">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white text-conter">
+                    <h3>FlowAI System</h3>
+                    <p>Grade Prediction System</p>
+                </div>
+
+                <div class="card-body">
+
+                    @* Error Message *@
+                    @if (!string.IsNullOrEmpty(errorMessage)) {
+                        <div class="alert alert-danger">
+                            @errorMessage
+                        </div>
+                    }
+
+                    @* Login Form *@
+                    <div class="mb-3">
+                        <label>Username</label>
+                        <input type="text"
+                               class="form-control"
+                               @bind="loginDto.Username"
+                               placeholder="Enter username" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Password</label>
+                        <input type="password"
+                               class="form-control"
+                               @bind="loginDto.Password"
+                               placeholder="Enter password" />
+                    </div>
+
+                    <button class="btn btn-primary w-100"
+                        @onclick="HandleLogin">
+                        @if (isLoading)
+                        {
+                            <span>Logding...</span>
+                        }
+                        else{
+                            <span>Login</span>
+                        }
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private LoginDto loginDto = new();
+    private string errorMessage="";
+    private bool isLoading= false;
+
+    private async Task HandleLogin() {
+        try {
+            isLoading = true;
+            errorMessage= "";
+
+            var result = await AuthService.LoginAsync(loginDto);
+
+            //Save token + rediret
+            Navigation.NavigateTo("/dashboard");
+        }
+        catch(UnauthorizedException ex){
+            errorMessage= ex.Message;
+        }
+        catch(Exception ex){
+            errorMessage= "Something went wrong!";
+        }
+        finally{
+            isLoading = false;
+        }
+    }
+}
