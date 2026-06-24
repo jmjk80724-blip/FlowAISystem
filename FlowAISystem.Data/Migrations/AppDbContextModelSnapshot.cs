@@ -53,7 +53,7 @@ namespace FlowAISystem.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("AIModels");
+                    b.ToTable("AIModels", (string)null);
                 });
 
             modelBuilder.Entity("FlowAISystem.Data.Entities.Enrollment", b =>
@@ -87,7 +87,7 @@ namespace FlowAISystem.Data.Migrations
 
                     b.HasIndex("SubjectId");
 
-                    b.ToTable("Enrollments");
+                    b.ToTable("Enrollments", (string)null);
                 });
 
             modelBuilder.Entity("FlowAISystem.Data.Entities.Feedback", b =>
@@ -117,7 +117,7 @@ namespace FlowAISystem.Data.Migrations
                     b.HasIndex("PredictionId")
                         .IsUnique();
 
-                    b.ToTable("Feedbacks");
+                    b.ToTable("Feedbacks", (string)null);
                 });
 
             modelBuilder.Entity("FlowAISystem.Data.Entities.Prediction", b =>
@@ -156,7 +156,7 @@ namespace FlowAISystem.Data.Migrations
 
                     b.HasIndex("EnrollmentId");
 
-                    b.ToTable("Predictions");
+                    b.ToTable("Predictions", (string)null);
                 });
 
             modelBuilder.Entity("FlowAISystem.Data.Entities.PredictionLog", b =>
@@ -193,7 +193,7 @@ namespace FlowAISystem.Data.Migrations
 
                     b.HasIndex("PredictionId");
 
-                    b.ToTable("PredictionLogs");
+                    b.ToTable("PredictionLogs", (string)null);
                 });
 
             modelBuilder.Entity("FlowAISystem.Data.Entities.Role", b =>
@@ -211,7 +211,7 @@ namespace FlowAISystem.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Roles");
+                    b.ToTable("Roles", (string)null);
                 });
 
             modelBuilder.Entity("FlowAISystem.Data.Entities.Score", b =>
@@ -240,7 +240,7 @@ namespace FlowAISystem.Data.Migrations
 
                     b.HasIndex("EnrollmentId");
 
-                    b.ToTable("Scores");
+                    b.ToTable("Scores", (string)null);
                 });
 
             modelBuilder.Entity("FlowAISystem.Data.Entities.Student", b =>
@@ -279,7 +279,7 @@ namespace FlowAISystem.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Students");
+                    b.ToTable("Students", (string)null);
                 });
 
             modelBuilder.Entity("FlowAISystem.Data.Entities.Subject", b =>
@@ -305,7 +305,7 @@ namespace FlowAISystem.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Subjects");
+                    b.ToTable("Subjects", (string)null);
                 });
 
             modelBuilder.Entity("FlowAISystem.Data.Entities.TrainingData", b =>
@@ -339,7 +339,7 @@ namespace FlowAISystem.Data.Migrations
 
                     b.HasIndex("AIModelId");
 
-                    b.ToTable("TrainingData");
+                    b.ToTable("TrainingData", (string)null);
                 });
 
             modelBuilder.Entity("FlowAISystem.Data.Entities.User", b =>
@@ -374,7 +374,7 @@ namespace FlowAISystem.Data.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("FlowAISystem.Data.Entities.Enrollment", b =>

@@ -101,7 +101,7 @@
     private int totalSubjects;
     private int totalPredictions;
     private double passRate;
-    private List<PredictionResponseDto> predictions;
+    private List<PredictionResponseDto> predictions = new();
 
     protected override async Task OnInitializedAsync()
     {

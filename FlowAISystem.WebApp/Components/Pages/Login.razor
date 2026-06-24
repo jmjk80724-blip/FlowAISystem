@@ -1,54 +1,57 @@
 @page "/login"
 @layout EmptLayout
+@using FlowAISystem.Core.Services.Interfaces
+@using FlowAISystem.Core.Exceptions
+@using FlowAISystem.Data.DTOs.Auth
 @inject IAuthService AuthService
 @inject NavigationManager Navigation
 
-<div class="container mt -5">
-    <div class="row justrify-conten-center">
-        <div class="col-md-4">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white text-conter">
-                    <h3>FlowAI System</h3>
-                    <p>Grade Prediction System</p>
+<div style="min-height:100vh; display:flex; 
+            align-items:center; justify-content:center; 
+            background-color:#f0f2f5;">
+    <div style="width:400px;">
+        <div class="card shadow-lg">
+            <div class="card-header bg-primary text-white text-center py-4">
+                <h3 class="mb-0"> FlowAI System</h3>
+                <p class="mb-0 mt-1">Grade Prediction System</p>
+            </div>
+            <div class="card-body p-4">
+
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div class="alert alert-danger">
+                        @errorMessage
+                    </div>
+                }
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Username</label>
+                    <input type="text"
+                           class="form-control form-control-lg"
+                           @bind="loginDto.Username"
+                           placeholder="Enter username" />
                 </div>
 
-                <div class="card-body">
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Password</label>
+                    <input type="password"
+                           class="form-control form-control-lg"
+                           @bind="loginDto.Password"
+                           placeholder="Enter password" />
+                </div>
 
-                    @* Error Message *@
-                    @if (!string.IsNullOrEmpty(errorMessage)) {
-                        <div class="alert alert-danger">
-                            @errorMessage
-                        </div>
-                    }
-
-                    @* Login Form *@
-                    <div class="mb-3">
-                        <label>Username</label>
-                        <input type="text"
-                               class="form-control"
-                               @bind="loginDto.Username"
-                               placeholder="Enter username" />
-                    </div>
-
-                    <div class="mb-3">
-                        <label>Password</label>
-                        <input type="password"
-                               class="form-control"
-                               @bind="loginDto.Password"
-                               placeholder="Enter password" />
-                    </div>
-
-                    <button class="btn btn-primary w-100"
+                <button class="btn btn-primary btn-lg w-100"
                         @onclick="HandleLogin">
-                        @if (isLoading)
-                        {
-                            <span>Logding...</span>
-                        }
-                        else{
-                            <span>Login</span>
-                        }
-                    </button>
-                </div>
+                    @if (isLoading)
+                    {
+                        <span>Loading...</span>
+                    }
+                    else
+                    {
+                        <span> Login</span>
+                    }
+                </button>
+
             </div>
         </div>
     </div>
@@ -56,27 +59,33 @@
 
 @code {
     private LoginDto loginDto = new();
-    private string errorMessage="";
-    private bool isLoading= false;
+    private string errorMessage = "";
+    private bool isLoading = false;
 
-    private async Task HandleLogin() {
-        try {
+    private async Task HandleLogin()
+    {
+        try
+        {
             isLoading = true;
-            errorMessage= "";
+            errorMessage = "";
+
+            Console.WriteLine($"Login attempt: {loginDto.Username}");
 
             var result = await AuthService.LoginAsync(loginDto);
 
-            //Save token + rediret
+            Console.WriteLine($"Login OK: {result.Username}");
+
             Navigation.NavigateTo("/dashboard");
         }
-        catch(UnauthorizedException ex){
-            errorMessage= ex.Message;
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+            Console.WriteLine($"Login error: {ex.Message}");
         }
-        catch(Exception ex){
-            errorMessage= "Something went wrong!";
-        }
-        finally{
+        finally
+        {
             isLoading = false;
+            StateHasChanged();
         }
     }
 }
