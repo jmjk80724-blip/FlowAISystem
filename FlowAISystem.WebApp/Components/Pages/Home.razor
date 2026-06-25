@@ -9,7 +9,16 @@
 
 <div class="container mt-4">
 
+
     <h2 class="mb-4"> Dashboard — FlowAI System</h2>
+    <div class="mb-4">
+        <a href="/students" class="btn btn-primary btn-lg shadow-sm">
+         List Student
+         </a>
+         <a href="/students/add" class="btn btn-success btn-lg shadow-sm ms-2">
+         Add new Student
+         </a>
+    </div>
 
     @* Stats Cards *@
     <div class="row mb-4">
@@ -120,4 +129,5 @@
             passRate   = Math.Round((double)passed / totalPredictions * 100, 1);
         }
     }
+    
 }

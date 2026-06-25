@@ -14,6 +14,7 @@ using MudBlazor.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 
+
 // ---Database postgre sql ---------
 builder.Services.AddDbContext<AppDbContext>(options => 
     options.UseNpgsql(
@@ -82,4 +83,5 @@ app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
+Console.WriteLine(BCrypt.Net.BCrypt.HashPassword("admin1234"));
 app.Run();
