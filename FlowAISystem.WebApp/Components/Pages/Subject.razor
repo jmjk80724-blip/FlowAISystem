@@ -1,0 +1,191 @@
+@page "/subjects"
+@rendermode InteractiveServer 
+@using FlowAISystem.Core.Services.Interfaces
+@using FlowAISystem.Data.DTOs.Subject
+@inject ISubjectService SubjectService
+@inject NavigationManager Navigation
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3> គ្រប់គ្រងមុខវិជ្ជា (Subjects)</h3>
+        <div>
+           
+            <a href="/dashboard" class="btn btn-outline-secondary me-2">
+                 Dashboard
+            </a>
+            <button class="btn btn-primary" @onclick="ShowAddForm">
+                Add Subject
+            </button>
+        </div>
+    </div>
+
+    @* Error Message *@
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger">@errorMessage</div>
+    }
+
+    @* Success Message *@
+    @if (!string.IsNullOrEmpty(successMessage))
+    {
+        <div class="alert alert-success">@successMessage</div>
+    }
+
+    @* Add Form *@
+    @if (showForm)
+    {
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Add New Subject</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Subject Name</label>
+                        <input class="form-control" @bind="newSubject.SubjectName" placeholder="Enter subject name" />
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label fw-bold">Credits</label>
+                        <input type="number" class="form-control" @bind="newSubject.Credits" min="1" max="6" />
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label fw-bold">Description</label>
+                        <input class="form-control" @bind="newSubject.Description" placeholder="Enter description" />
+                    </div>
+                </div>
+                <button class="btn btn-success me-2" @onclick="HandleCreate"> Save</button>
+                <button class="btn btn-secondary" @onclick="HideForm">Cancel</button>
+            </div>
+        </div>
+    }
+
+    @* Subjects Table *@
+    @if (subjects == null)
+    {
+        <div class="text-center my-4">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2">Loading subjects...</p>
+        </div>
+    }
+    else if (!subjects.Any())
+    {
+        <div class="alert alert-info text-center">No subjects yet.</div>
+    }
+    else
+    {
+        <div class="table-responsive shadow-sm">
+            <table class="table table-striped table-hover align-middle">
+                <thead class="table-primary">
+                    <tr>
+                        <th>#</th>
+                        <th>Subject Name</th>
+                        <th>Credits</th>
+                        <th>Description</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var s in subjects)
+                    {
+                        <tr>
+                            <td>@s.Id</td>
+                            <td>@s.SubjectName</td>
+                            <td>@s.Credits</td>
+                            <td>@s.Description</td>
+                            <td>
+                                <button class="btn btn-danger btn-sm" @onclick="() => HandleDelete(s.Id)">
+                                    🗑 Delete
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+</div>
+
+@code {
+    private List<SubjectResponseDto> subjects = null; // ដាក់ null ដើម្បីបង្ហាញ Loading Spinner ពេលទាញទិន្នន័យ
+    private SubjectCreateDto newSubject = new();
+    private string errorMessage = "";
+    private string successMessage = "";
+    private bool showForm = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadSubjects();
+    }
+
+    private async Task LoadSubjects()
+    {
+        try
+        {
+            subjects = await SubjectService.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"មានបញ្ហាក្នុងការទាញទិន្នន័យមុខវិជ្ជា: {ex.Message}";
+            subjects = new List<SubjectResponseDto>(); // ការពារកុំឱ្យ UI គាំងពណ៌ស
+        }
+    }
+
+    private void ShowAddForm()
+    {
+        showForm = true;
+        newSubject = new() { Credits = 3 }; // ដាក់តម្លៃក្រេឌីតលំនាំដើមស្មើ 3
+        ClearMessages();
+    }
+
+    private void HideForm()
+    {
+        showForm = false;
+        newSubject = new();
+        ClearMessages();
+    }
+
+    private async Task HandleCreate()
+    {
+        if (string.IsNullOrWhiteSpace(newSubject.SubjectName))
+        {
+            errorMessage = "សូមបញ្ចូលឈ្មោះមុខវិជ្ជា!";
+            return;
+        }
+
+        try
+        {
+            ClearMessages();
+            await SubjectService.CreateAsync(newSubject);
+            successMessage = "Subject added successfully!";
+            showForm = false;
+            await LoadSubjects();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+    }
+
+    private async Task HandleDelete(int id)
+    {
+        try
+        {
+            ClearMessages();
+            await SubjectService.DeleteAsync(id);
+            successMessage = "Subject deleted!";
+            await LoadSubjects();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+    }
+
+    private void ClearMessages()
+    {
+        errorMessage = "";
+        successMessage = "";
+    }
+}

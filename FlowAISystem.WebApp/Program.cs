@@ -14,7 +14,7 @@ using MudBlazor.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 
-
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 // ---Database postgre sql ---------
 builder.Services.AddDbContext<AppDbContext>(options => 
     options.UseNpgsql(
