@@ -2,7 +2,7 @@ using System;
 using FlowAISystem.Data.DTOs.Student;
 using FlowAISystem.Data.Entities;
 
-namespace FlowAISystem.Core.Services.Interface
+namespace FlowAISystem.Core.Services.Interfaces
 {
     public interface IStudentService
     {

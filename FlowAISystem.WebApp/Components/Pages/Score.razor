@@ -1,0 +1,190 @@
+@page "/scores"
+@layout MainLayout
+@using FlowAISystem.Core.Services.Interfaces
+@using FlowAISystem.Data.DTOs.Score
+@using FlowAISystem.Data.DTOs.Enrollment
+@inject IScoreService ScoreService
+@inject IEnrollmentService EnrollmentService
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between mb-3">
+        <h3> Scores</h3>
+        <button class="btn btn-primary" @onclick="ShowAddForm">
+             Add Score
+        </button>
+    </div>
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger">@errorMessage</div>
+    }
+
+    @if (!string.IsNullOrEmpty(successMessage))
+    {
+        <div class="alert alert-success">@successMessage</div>
+    }
+
+    @* Add Form *@
+    @if (showForm)
+    {
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5>Add New Score</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-bold">Enrollment</label>
+                        <select class="form-control" @bind="newScore.EnrollmentId">
+                            <option value="0">Select Enrollment...</option>
+                            @foreach (var e in enrollments)
+                            {
+                                <option value="@e.Id">
+                                    @e.StudentName — @e.SubjectName (@e.Semester @e.Year)
+                                </option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-bold">Score Type</label>
+                        <select class="form-control" @bind="newScore.ScoreType">
+                            <option value="">Select...</option>
+                            <option value="Assignment">Assignment</option>
+                            <option value="Midterm">Midterm</option>
+                            <option value="Final">Final</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-bold">Value (0-100)</label>
+                        <input type="number" class="form-control" @bind="newScore.Value" min="0" max="100" />
+                    </div>
+                </div>
+                <button class="btn btn-success me-2" @onclick="HandleCreate">
+                     Save
+                </button>
+                <button class="btn btn-secondary" @onclick="HideForm">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    }
+
+    @* Scores Table *@
+    @if (scores == null)
+    {
+        <p>Loading...</p>
+    }
+    else if (!scores.Any())
+    {
+        <p>No scores yet.</p>
+    }
+    else
+    {
+        <table class="table table-striped table-hover">
+            <thead class="table-primary">
+                <tr>
+                    <th>#</th>
+                    <th>Student</th>
+                    <th>Subject</th>
+                    <th>Type</th>
+                    <th>Score</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (ScoreResponseDto s in scores)
+                {
+                    <tr>
+                        <td>@s.Id</td>
+                        <td>@s.StudentName</td>
+                        <td>@s.SubjectName</td>
+                        <td>@s.ScoreType</td>
+                        <td>
+                            <span class="badge @(s.Value >= 50 ? "bg-success" : "bg-danger")">
+                                @s.Value
+                            </span>
+                        </td>
+
+                        <td>
+                            <button class="btn btn-danger btn-sm" @onclick="() => HandleDelete(s.Id)">
+                                 Delete
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+</div>
+
+@code {
+    private List<ScoreResponseDto> scores = new();
+    private List<EnrollmentReponseDto> enrollments = new();
+    private ScoreCreateDto newScore = new();
+    private string errorMessage = "";
+    private string successMessage = "";
+    private bool showForm = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        try
+        {
+            scores      = await ScoreService.GetAllAsync();
+            enrollments = await EnrollmentService.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+    }
+
+    private void ShowAddForm()
+    {
+        showForm = true;
+        newScore = new();
+        errorMessage = "";
+        successMessage = "";
+    }
+
+    private void HideForm()
+    {
+        showForm = false;
+        newScore = new();
+    }
+
+    private async Task HandleCreate()
+    {
+        try
+        {
+            await ScoreService.CreateAysync(newScore);
+            successMessage = "Score added successfully!";
+            showForm = false;
+            await LoadData();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+    }
+
+    private async Task HandleDelete(int id)
+    {
+        try
+        {
+            await ScoreService.DeleteAsynce(id);
+            successMessage = "Score deleted!";
+            await LoadData();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+    }
+}

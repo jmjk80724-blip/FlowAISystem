@@ -1,4 +1,5 @@
 @page "/subjects"
+@layout MainLayout
 @rendermode InteractiveServer 
 @using FlowAISystem.Core.Services.Interfaces
 @using FlowAISystem.Data.DTOs.Subject
@@ -8,7 +9,7 @@
 <div class="container mt-4">
 
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3> គ្រប់គ្រងមុខវិជ្ជា (Subjects)</h3>
+        <h3> Subjects</h3>
         <div>
            
             <a href="/dashboard" class="btn btn-outline-secondary me-2">
@@ -95,7 +96,7 @@
                             <td>@s.Description</td>
                             <td>
                                 <button class="btn btn-danger btn-sm" @onclick="() => HandleDelete(s.Id)">
-                                    🗑 Delete
+                                     Delete
                                 </button>
                             </td>
                         </tr>

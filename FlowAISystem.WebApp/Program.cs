@@ -1,6 +1,5 @@
 using System.Text;
 using FlowAISystem.Core.Services;
-using FlowAISystem.Core.Services.Interface;
 using FlowAISystem.Core.Services.Interfaces;
 using FlowAISystem.Data;
 using FlowAISystem.WebApp.Components;
@@ -23,7 +22,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 );
 
 // --Service DI ----
-builder.Services.AddScoped<IStudentService,    StudentService>();
+builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<ISubjectService,    SubjectService>();
 builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
 builder.Services.AddScoped<IScoreService,      ScoreService>();

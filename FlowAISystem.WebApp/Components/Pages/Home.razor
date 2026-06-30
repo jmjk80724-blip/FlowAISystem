@@ -1,111 +1,163 @@
 ﻿@page "/"
-
-@layout EmptLayout
-@using FlowAISystem.Core.Services.Interface
-
+@page "/dashboard"
+@layout MainLayout
+@using FlowAISystem.Core.Services.Interfaces
+@using FlowAISystem.Core.Services
 @inject IStudentService StudentService
 @inject ISubjectService SubjectService
 @inject IPredictionService PredictionService
 @inject NavigationManager Navigation
 
-<div class="container mt-4">
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-    <h2 class="mb-4"> Dashboard — FlowAI System</h2>
-    <div class="mb-4">
-        <a href="/students" class="btn btn-primary btn-lg shadow-sm">
-         List Student
-         </a>
-         <a href="/students/add" class="btn btn-success btn-lg shadow-sm ms-2">
-         Add new Student
-         </a>
+<div class="container-fluid px-4 py-4" style="background-color: #f8f9fa; min-height: 100vh;">
+    
+    @* Header Section *@
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+        <div>
+            <h2 class="fw-bold text-dark m-0">Dashboard</h2>
+            <small class="text-muted">Welcome to FlowAI System Overview</small>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="/students" class="btn btn-outline-primary d-flex align-items-center gap-2 shadow-sm">
+                <i class="bi bi-list-ul"></i> List Student
+            </a>
+            <a href="/students/add" class="btn btn-primary d-flex align-items-center gap-2 shadow-sm">
+                <i class="bi bi-person-plus-fill"></i> Add New Student
+            </a>
+        </div>
     </div>
 
-    @* Stats Cards *@
-    <div class="row mb-4">
-
-        <div class="col-md-3">
-            <div class="card bg-primary text-white text-center p-3">
-                <h2>@totalStudents</h2>
-                <p>Total Students</p>
+    @*  Stats Cards Section *@
+    <div class="row g-3 mb-4">
+        @* Total Students Card *@
+        <div class="col-12 col-sm-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #0d6efd !important;">
+                <div class="card-body d-flex align-items-center justify-content-between p-4">
+                    <div>
+                        <small class="text-muted text-uppercase fw-bold text-xs">Total Students</small>
+                        <h2 class="fw-bold text-dark mt-1 mb-0">@totalStudents</h2>
+                    </div>
+                    <div class="bg-primary bg-opacity-10 text-primary rounded p-3">
+                        <i class="bi bi-people fs-3"></i>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="col-md-3">
-            <div class="card bg-success text-white text-center p-3">
-                <h2>@totalSubjects</h2>
-                <p>Total Subjects</p>
+        @* Total Subjects Card *@
+        <div class="col-12 col-sm-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #198754 !important;">
+                <div class="card-body d-flex align-items-center justify-content-between p-4">
+                    <div>
+                        <small class="text-muted text-uppercase fw-bold text-xs">Total Subjects</small>
+                        <h2 class="fw-bold text-dark mt-1 mb-0">@totalSubjects</h2>
+                    </div>
+                    <div class="bg-success bg-opacity-10 text-success rounded p-3">
+                        <i class="bi bi-book fs-3"></i>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="col-md-3">
-            <div class="card bg-warning text-white text-center p-3">
-                <h2>@totalPredictions</h2>
-                <p>Total Predictions</p>
+        @* Total Predictions Card *@
+        <div class="col-12 col-sm-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #ffc107 !important;">
+                <div class="card-body d-flex align-items-center justify-content-between p-4">
+                    <div>
+                        <small class="text-muted text-uppercase fw-bold text-xs">Total Predictions</small>
+                        <h2 class="fw-bold text-dark mt-1 mb-0">@totalPredictions</h2>
+                    </div>
+                    <div class="bg-warning bg-opacity-10 text-warning rounded p-3">
+                        <i class="bi bi-cpu fs-3"></i>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="col-md-3">
-            <div class="card bg-danger text-white text-center p-3">
-                <h2>@passRate%</h2>
-                <p>Pass Rate</p>
+        @* Pass Rate Card *@
+        <div class="col-12 col-sm-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #dc3545 !important;">
+                <div class="card-body d-flex align-items-center justify-content-between p-4">
+                    <div>
+                        <small class="text-muted text-uppercase fw-bold text-xs">Pass Rate</small>
+                        <h2 class="fw-bold text-dark mt-1 mb-0">@passRate%</h2>
+                    </div>
+                    <div class="bg-danger bg-opacity-10 text-danger rounded p-3">
+                        <i class="bi bi-graph-up-arrow fs-3"></i>
+                    </div>
+                </div>
             </div>
         </div>
-
     </div>
 
-    @* Recent Predictions *@
-    <div class="card">
-        <div class="card-header">
-            <h5>Recent Predictions</h5>
+    @*  Recent Predictions Table Section *@
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white py-3 d-flex align-items-center justify-content-between">
+            <h5 class="fw-bold text-dark m-0 d-flex align-items-center gap-2">
+                <i class="bi bi-clock-history text-secondary"></i> Recent System Predictions
+            </h5>
+            <span class="badge bg-secondary bg-opacity-10 text-secondary border">Top 5 Entries</span>
         </div>
-        <div class="card-body">
+        <div class="card-body p-0">
             @if (predictions == null)
             {
-                <p>Loading...</p>
+                <div class="d-flex align-items-center justify-content-center py-5 gap-3">
+                    <div class="spinner-border text-primary spinner-border-sm" role="status"></div>
+                    <p class="text-muted m-0">Loading predictions data...</p>
+                </div>
             }
             else if (!predictions.Any())
             {
-                <p>No predictions yet.</p>
+                <div class="text-center py-5">
+                    <i class="bi bi-folder-x fs-1 text-muted"></i>
+                    <p class="text-muted mt-2 mb-0">No predictions found in the database.</p>
+                </div>
             }
             else
             {
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Student</th>
-                            <th>Subject</th>
-                            <th>Average</th>
-                            <th>Result</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var p in predictions.Take(5))
-                        {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light text-uppercase fs-xs">
                             <tr>
-                                <td>@p.StudentName</td>
-                                <td>@p.SubjectName</td>
-                                <td>@p.AverageScore.ToString("F2")</td>
-                                <td>
-                                    @if (p.Result == "Pass")
-                                    {
-                                        <span class="badge bg-success">Pass</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-danger">Fail</span>
-                                    }
-                                </td>
+                                <th class="ps-4 py-3 text-muted fw-semibold">Student Name</th>
+                                <th class="py-3 text-muted fw-semibold">Subject</th>
+                                <th class="py-3 text-muted fw-semibold text-center">Average Score</th>
+                                <th class="pe-4 py-3 text-muted fw-semibold text-end">Status Result</th>
                             </tr>
-                        }
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            @foreach (var p in predictions.Take(5))
+                            {
+                                <tr>
+                                    <td class="ps-4 fw-medium text-dark">@p.StudentName</td>
+                                    <td><span class="badge bg-light text-dark border px-2.5 py-1.5 rounded">@p.SubjectName</span></td>
+                                    <td class="text-center fw-bold text-secondary">@p.AverageScore.ToString("F2")</td>
+                                    <td class="pe-4 text-end">
+                                        @if (p.Result == "Pass")
+                                        {
+                                            <span class="badge bg-success-subtle text-success border border-success border-opacity-25 px-3 py-1.5 rounded-pill fw-bold">
+                                                <i class="bi bi-check-circle-fill me-1"></i> Pass
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger-subtle text-danger border border-danger border-opacity-25 px-3 py-1.5 rounded-pill fw-bold">
+                                                <i class="bi bi-x-circle-fill me-1"></i> Fail
+                                            </span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
             }
         </div>
     </div>
 
 </div>
-
 @code {
     private int totalStudents;
     private int totalSubjects;
@@ -115,20 +167,20 @@
 
     protected override async Task OnInitializedAsync()
     {
+        //  Services
         var students    = await StudentService.GetAllAsync();
         var subjects    = await SubjectService.GetAllAsync();
         predictions     = await PredictionService.GetAllAsync();
 
-        totalStudents    = students.Count;
-        totalSubjects    = subjects.Count;
-        totalPredictions = predictions.Count;
+        totalStudents    = students?.Count ?? 0;
+        totalSubjects    = subjects?.Count ?? 0;
+        totalPredictions = predictions?.Count ?? 0;
 
-        //  Pass Rate
-        if (predictions.Any())
+        // គណនាអត្រាប្រឡងជាប់
+        if (predictions != null && predictions.Any())
         {
             var passed = predictions.Count(p => p.Result == "Pass");
             passRate   = Math.Round((double)passed / totalPredictions * 100, 1);
         }
     }
-    
 }

@@ -3,7 +3,7 @@ using FlowAISystem.Data.DTOs.Student;
 using Microsoft.EntityFrameworkCore;
 using FlowAISystem.Data;
 using FlowAISystem.Data.Entities;
-using FlowAISystem.Core.Services.Interface;
+using FlowAISystem.Core.Services.Interfaces;
 using FlowAISystem.Core.Exceptions;
 
 namespace FlowAISystem.Core.Services

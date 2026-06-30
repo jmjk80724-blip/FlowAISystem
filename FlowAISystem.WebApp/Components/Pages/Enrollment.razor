@@ -1,0 +1,210 @@
+@page "/enrollments"
+@layout MainLayout
+@using FlowAISystem.Core.Services.Interfaces
+@using FlowAISystem.Data.DTOs.Enrollment
+@using FlowAISystem.Data.DTOs.Student
+@using FlowAISystem.Data.DTOs.Subject
+
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.VisualBasic
+
+@inject IEnrollmentService EnrollmentService
+@inject IStudentService StudentService
+@inject ISubjectService SubjectService
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between mb-3">
+        <h3>Enrollment</h3>
+        <button class="btn btn-primary" @onclick="ShowAddForm">
+            Add Enrollment
+        </button>
+    </div>
+    @if (!string.IsNullOrEmpty(errorMessage)) {
+        <div class="alert alert-danger">@errorMessage</div>
+    }
+    @if (!string.IsNullOrEmpty(successMessage)) {
+        <div class="alert alert-success">@successMessage</div>
+    }
+
+    @* Add Form *@
+@if (showForm)
+{
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5>Add New Enrollment</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+               
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">Student</label>
+                    <select class="form-control" @bind="newEnrollment.StudentId">
+                        <option value="0">Select Student...</option>
+                        @foreach (var s in students)
+                        {
+                            <option value="@s.Id">@s.FullName</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">Subject</label>
+                    <select class="form-control" @bind="newEnrollment.SubjectId">
+                        <option value="0">Select Subject...</option>
+                        @foreach (var s in subjects)
+                        {
+                            <option value="@s.Id">@s.SubjectName</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">Semester</label>
+                    <select class="form-control" @bind="newEnrollment.Semester">
+                        <option value="">Select...</option>
+                        <option value="Semester 1">Semester 1</option>
+                        <option value="Semester 2">Semester 2</option>
+                    </select>
+                </div>
+
+               
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">Year</label>
+                    <input type="number" class="form-control" @bind="newEnrollment.Year" min="2020" max="2100" />
+                </div>
+            </div>
+            
+            <button class="btn btn-success me-2" @onclick="HandleCreate">
+                 Save
+            </button>
+            <button class="btn btn-secondary" @onclick="HideForm">
+                Cancel
+            </button>
+        </div>
+    </div>
+}
+    @if (enrollments == null) {
+        <p>Loading...</p>
+    }
+    else if (!enrollments.Any()) {
+        <p>No enrollments yet.</p>
+    }
+    else{
+        <table class="table table-striped table-hover">
+            <thead class="table-primary">
+                <tr>
+                    <th>#</th>
+                    <th>Student</th>
+                    <th>Subject</th>
+                    <th>Semester</th>
+                    <th>Year</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach(var e in enrollments){
+                    <tr>
+                        <td>@e.Id</td>
+                        <td>@e.StudentName</td>
+                        <td>@e.SubjectName</td>
+                        <td>@e.Semester</td>
+                        <td>@e.Year</td>
+                        <button class="btn btn-danger btn-sm" @onclick="() => HandleDelete(e.Id)">
+                            Delete
+                        </button>
+                        <td></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+@code {
+    private List<EnrollmentReponseDto> enrollments = new ();
+    private List<StudentResponseDto> students = new();
+    private List<SubjectResponseDto> subjects = new();
+    private EnrollmentCreateDto newEnrollment = new();
+    
+    private string errorMessage ="";
+    private string successMessage = "";
+    private bool showForm = false;
+    private bool isEditMode = false;
+    private int editingEnrollmentId =0;
+
+    protected override async Task OnInitializedAsync() {
+        await LoadData();
+    }
+
+    private async Task LoadData() {
+        try {
+            enrollments = await EnrollmentService.GetAllAsync();
+            students    = await StudentService.GetAllAsync();
+            subjects    = await SubjectService.GetAllAsync();
+        }
+        catch (Exception ex) {
+            errorMessage = ex.Message;
+        }
+    }
+
+    private void ShowAddForm() {
+        showForm = true;
+        isEditMode = false;
+        newEnrollment = new() {Year = DateTime.Now.Year};
+        errorMessage  ="";
+        successMessage = "";
+    }
+
+    // Open form in web
+    private void ShowEditForm(EnrollmentReponseDto enrollment) {
+        showForm = true;
+        isEditMode = true;
+        editingEnrollmentId = enrollment.Id;
+
+        // copy form by data old
+        newEnrollment = new EnrollmentCreateDto {
+            StudentId = enrollment.StudentId,
+            SubjectId = enrollment.SubjectId,
+            Semester  = enrollment.Semester,
+            Year      = enrollment.Year
+        };
+        errorMessage ="";
+        successMessage = "";
+    }
+
+    private void ShowEditForm() {
+        showForm = true;
+        isEditMode = false;
+        newEnrollment = new() {Year = DateTime.Now.Year};
+        errorMessage = "";
+        successMessage = "";
+    }
+
+    private void HideForm() {
+        showForm = false;
+        isEditMode = false;
+        newEnrollment = new();
+    }
+
+    private async Task HandleCreate() {
+        try {
+            await EnrollmentService.CreateAsync(newEnrollment);
+            successMessage = "Enrollment added successfully!";
+            showForm = false;
+            await LoadData();
+        }
+        catch(Exception ex) {
+            errorMessage =ex.Message;
+        }
+    }
+    
+    private async Task HandleDelete(int id) {
+        try {
+            await EnrollmentService.DeleteAsync(id);
+            successMessage = "Enrollment delete!";
+            await LoadData();
+        }
+        catch (Exception ex) {
+            errorMessage = ex.Message;
+        }
+    }
+    }
