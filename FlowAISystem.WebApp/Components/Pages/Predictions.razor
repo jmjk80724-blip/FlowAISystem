@@ -1,0 +1,146 @@
+@page "/predictions"
+@layout MainLayout
+@using FlowAISystem.Core.Services
+@using FlowAISystem.Data.DTOs.Enrollment
+
+@inject IPredictionService PredictionService
+@inject IEnrollmentService EnrollmentService
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between mb-3">
+        <h3>Predictions</h3>
+        <button class="btn btn-primary" @onclick="ShowPredictionForm">
+            Predict
+        </button>
+    </div>
+    @if(!string.IsNullOrEmpty(errorMessage)) {
+        <div class="alert alert-danger">@errorMessage</div>
+    }
+
+    @if(!string.IsNullOrEmpty(errorMessage)) {
+        <div class="alert alert-success">@susseccMessage</div>
+    }
+
+    @if (showForm) {
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-whit">
+                <h5> Generate Prediction </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Enrollment</label>
+                        <select class="form-control" @bind="requestDto.EnrollmentId">
+                            <option value="0">Select Enrollment...</option>
+                            @foreach (var e in enrollments) {
+                                <option value="@e.Id">@e.StudentName - @e.SubjectName</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <button class="btn btn-success " @onclick="HandlePrediction" disabled="@isLoading">
+                   @(isLoading ? "Generating..." : "Generate Prediction")
+                </button>
+                <button class="btn btn-secondary" @onclick="HideForm">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    }
+    @if (predictions == null) {
+        <p>Loading...</p>
+    }
+    else if(!predictions.Any()) {
+        <p> No prediction yet. </p>
+    }
+    else {
+        <table class="table table-striped table-hover">
+            <thead class="table-primary">
+                <tr>
+                    <th>#</th>
+                    <th>Student</th>
+                    <th>Subject</th>
+                    <th>Average</th>
+                    <th>Result</th>
+                    <th>Recommentdation</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach( var p in predictions) {
+                    <tr>
+                        <td>@p.Id</td>
+                        <td>@p.StudentName</td>
+                        <td>@p.SubjectName</td>
+                        <td>@p.AverageScore.ToString("F2") %</td>
+                        <td>
+                            @if (p.Result == "Pass") {
+                                <span class="badge bg-success">Pass</span>
+                            }
+                            else {
+                                <span class="badge bg-danger">Fail</span>
+                            }
+                        </td>
+                        <td>@p.Recommendation</td>
+                        <td class="badge bg-dark text-info font-monospace">@p.AIModelName</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+@code {
+    private List<PredictionResponseDto> predictions = new ();
+    private List<EnrollmentReponseDto> enrollments = new();
+    private PredictionRequestDto requestDto = new();
+    private string errorMessage = "";
+    private string susseccMessage = "";
+    private bool showForm = false;
+    private bool isLoading = false;
+
+    protected override async Task OnInitializedAsync() {
+        await LoadData();
+    }
+
+    private async Task LoadData() {
+        try {
+            predictions  =  await PredictionService.GetAllAsync();
+            enrollments = await EnrollmentService.GetAllAsync();
+        }
+        catch (Exception ex){
+            errorMessage = ex.Message;
+        }
+    }
+
+    private async Task ShowPredictionForm() {
+        showForm = true;
+        requestDto = new();
+        errorMessage = "";
+        susseccMessage ="";
+    }
+
+    private async Task HideForm(){
+       showForm = false;
+       requestDto = new();
+    }
+
+    private async Task HandlePrediction() {
+        if (requestDto.EnrollmentId == 0) {
+            errorMessage = "Please select Enrollment frist before predicting the results";
+            return;
+        }
+        try {
+            isLoading = true;
+            errorMessage = "";
+            var result = await PredictionService.PredictAsync(requestDto);
+            susseccMessage = "";
+            await LoadData();
+        }
+        catch (Exception ex) {
+            errorMessage = ex.Message;
+        }
+        finally {
+            isLoading = false;
+        }
+    }
+}

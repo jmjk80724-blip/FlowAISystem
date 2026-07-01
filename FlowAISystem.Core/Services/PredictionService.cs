@@ -96,11 +96,21 @@ namespace FlowAISystem.Core.Services
             var aiModel = await _context.AIModels
                 .OrderByDescending(m => m.TrainedAt)
                 .FirstOrDefaultAsync();
+            
 
             if (aiModel == null)
                 throw new NotFoundException("No AI Model found");
+            
+            var existing = await _context.Predictions
+                .FirstOrDefaultAsync(p => p.EnrollmentId == dto.EnrollmentId);
+            if(existing != null)
+            {
+                _context.Predictions.Remove(existing);
+                await _context.SaveChangesAsync();
+            }
 
             // ៦. Save Prediction
+
             var prediction = new Prediction
             {
                 EnrollmentId   = dto.EnrollmentId,
@@ -111,6 +121,7 @@ namespace FlowAISystem.Core.Services
             };
 
             _context.Predictions.Add(prediction);
+            await _context.SaveChangesAsync();
 
             // ៧. Save PredictionLog
             var log = new PredictionLog
@@ -137,6 +148,7 @@ namespace FlowAISystem.Core.Services
                 AIModelName    = aiModel.ModelName,
                 CreatedAt      = prediction.CreatedAt
             };
+
         }
 
         // ── Private Helper Methods ──────────────────────
@@ -150,7 +162,7 @@ namespace FlowAISystem.Core.Services
                 .Average() * 0.30;
 
             double midterm = scores
-                .Where(s => s.ScoreType == "Midterm")
+                .Where(s => s.ScoreType == "Midterm" )
                 .Select(s => s.Value)
                 .DefaultIfEmpty(0)
                 .Average() * 0.30;

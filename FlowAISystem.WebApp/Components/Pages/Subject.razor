@@ -128,7 +128,7 @@
         }
         catch (Exception ex)
         {
-            errorMessage = $"មានបញ្ហាក្នុងការទាញទិន្នន័យមុខវិជ្ជា: {ex.Message}";
+            errorMessage = $"Have Problem when install Data!: {ex.Message}";
             subjects = new List<SubjectResponseDto>(); // ការពារកុំឱ្យ UI គាំងពណ៌ស
         }
     }
@@ -151,7 +151,7 @@
     {
         if (string.IsNullOrWhiteSpace(newSubject.SubjectName))
         {
-            errorMessage = "សូមបញ្ចូលឈ្មោះមុខវិជ្ជា!";
+            errorMessage = "Please Enter Subject!";
             return;
         }
 
