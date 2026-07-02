@@ -3,6 +3,8 @@
 @rendermode InteractiveServer 
 @using FlowAISystem.Core.Services.Interfaces
 @using FlowAISystem.Data.DTOs.Subject
+@using FlowAISystem.WebApp.Validations
+@using Microsoft.AspNetCore.Components.Forms
 @inject ISubjectService SubjectService
 @inject NavigationManager Navigation
 
@@ -21,13 +23,13 @@
         </div>
     </div>
 
-    @* Error Message *@
+   
     @if (!string.IsNullOrEmpty(errorMessage))
     {
         <div class="alert alert-danger">@errorMessage</div>
     }
 
-    @* Success Message *@
+  
     @if (!string.IsNullOrEmpty(successMessage))
     {
         <div class="alert alert-success">@successMessage</div>
@@ -41,22 +43,26 @@
                 <h5 class="mb-0">Add New Subject</h5>
             </div>
             <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold">Subject Name</label>
-                        <input class="form-control" @bind="newSubject.SubjectName" placeholder="Enter subject name" />
+                <EditForm Model="newSubject" OnValidSubmit="HandleCreate">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary class="text-danger" />
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Subject Name</label>
+                            <InputText class="form-control" @bind-Value="newSubject.SubjectName" placeholder="Enter subject name" />
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label fw-bold">Credits</label>
+                            <InputNumber class="form-control" @bind-Value="newSubject.Credits" min="1" max="6" />
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label fw-bold">Description</label>
+                            <InputText class="form-control" @bind-Value="newSubject.Description" placeholder="Enter description" />
+                        </div>
                     </div>
-                    <div class="col-md-3 mb-3">
-                        <label class="form-label fw-bold">Credits</label>
-                        <input type="number" class="form-control" @bind="newSubject.Credits" min="1" max="6" />
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <label class="form-label fw-bold">Description</label>
-                        <input class="form-control" @bind="newSubject.Description" placeholder="Enter description" />
-                    </div>
-                </div>
-                <button class="btn btn-success me-2" @onclick="HandleCreate"> Save</button>
-                <button class="btn btn-secondary" @onclick="HideForm">Cancel</button>
+                    <button type="submit" class="btn btn-success me-2">Save</button>
+                    <button type="button" class="btn btn-secondary" @onclick="HideForm">Cancel</button>
+                </EditForm>
             </div>
         </div>
     }
@@ -109,7 +115,7 @@
 </div>
 
 @code {
-    private List<SubjectResponseDto> subjects = null; // ដាក់ null ដើម្បីបង្ហាញ Loading Spinner ពេលទាញទិន្នន័យ
+    private List<SubjectResponseDto>? subjects = null;
     private SubjectCreateDto newSubject = new();
     private string errorMessage = "";
     private string successMessage = "";
@@ -136,25 +142,25 @@
     private void ShowAddForm()
     {
         showForm = true;
-        newSubject = new() { Credits = 3 }; // ដាក់តម្លៃក្រេឌីតលំនាំដើមស្មើ 3
+        newSubject = new() { Credits = 3, SubjectName = string.Empty, Description = string.Empty };
         ClearMessages();
     }
 
     private void HideForm()
     {
         showForm = false;
-        newSubject = new();
+        newSubject = new() { Credits = 3, SubjectName = string.Empty, Description = string.Empty };
         ClearMessages();
     }
 
     private async Task HandleCreate()
     {
-        if (string.IsNullOrWhiteSpace(newSubject.SubjectName))
+        var errors = SubjectValidator.Validate(newSubject);
+        if (errors != null)
         {
-            errorMessage = "Please Enter Subject!";
+            errorMessage = errors;
             return;
         }
-
         try
         {
             ClearMessages();

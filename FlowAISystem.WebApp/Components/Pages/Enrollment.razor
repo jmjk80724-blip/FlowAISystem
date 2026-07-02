@@ -4,7 +4,7 @@
 @using FlowAISystem.Data.DTOs.Enrollment
 @using FlowAISystem.Data.DTOs.Student
 @using FlowAISystem.Data.DTOs.Subject
-
+@using FlowAISystem.WebApp.Validations
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.VisualBasic
 
@@ -186,6 +186,11 @@
     }
 
     private async Task HandleCreate() {
+        var error = EnrollmentValidator.Validate(newEnrollment);
+        if(error != null) {
+            errorMessage = error;
+            return;
+        }
         try {
             await EnrollmentService.CreateAsync(newEnrollment);
             successMessage = "Enrollment added successfully!";

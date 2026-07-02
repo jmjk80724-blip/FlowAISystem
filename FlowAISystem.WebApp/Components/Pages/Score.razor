@@ -46,7 +46,7 @@
                         <select class="form-control" @bind="newScore.ScoreType">
                             <option value="">Select...</option>
                             <option value="Assignment">Assignment</option>
-                            <option value="Miderm">Midterm</option>
+                            <option value="Midterm">Midterm</option>
                             <option value="Final">Final</option>
                         </select>
                     </div>
@@ -144,6 +144,11 @@
     }   
 
     private async Task HandleCreate() {
+        var error = ScoreValidator.Validate(newScore);
+        if (error != null) {
+            errorMessage = error;
+            return;
+        }
         try{
             if(newScore.EnrollmentId == 0 || string.IsNullOrEmpty(newScore.ScoreType)) {
                 errorMessage = " Please Select Enrollment and Score Type";

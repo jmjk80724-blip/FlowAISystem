@@ -84,7 +84,19 @@ namespace FlowAISystem.Core.Services
 
             if (!scores.Any())
                 throw new NotFoundException("No scores found for this enrollment");
+            
+            var hasAssignment = scores.Any(s => s.ScoreType == "Assignment");
+            var hasMidterm    = scores.Any(s => s.ScoreType == "Midterm");
+            var hasFinal      = scores.Any(s => s.ScoreType == "Final");
 
+            if (!hasAssignment || !hasMidterm || !hasFinal)
+            {
+                var missing = new List<string>();
+                if (!hasAssignment) missing.Add("Assignment");
+                if (!hasMidterm)    missing.Add("Midterm");
+                if (!hasFinal)      missing.Add("Final");
+                throw new InvalidOperationException($"Missing scores: {string.Join(", ", missing)}");
+            }
             // ៣. គណនា Weighted Average
             double average = CalculateWeightedAverage(scores);
 

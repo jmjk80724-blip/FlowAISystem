@@ -4,6 +4,7 @@
 @using FlowAISystem.Core.Services
 @using FlowAISystem.Core.Services.Interfaces
 @using FlowAISystem.Data.Entities
+@using FlowAISystem.WebApp.Validations
 @inject IStudentService StudentService
 
 <div clas="container mt-4">
@@ -152,10 +153,12 @@
     }
 
     private async Task HandleCreate() {
-        if(string.IsNullOrWhiteSpace(newStudent.FullName)) {
-            errorMessage = "Please, Enter Student Name!";
-            return;
-        }
+        var error = StudentValidator.Validate(newStudent);
+       if (error != null) {
+        errorMessage = error ;
+        return;
+       }    
+        
         try {
             ClearMessages();
             await StudentService.CreateAsync(newStudent);

@@ -55,9 +55,9 @@ namespace FlowAISystem.Core.Services
 
              var subject =  new Subject
              {
-                 SubjectName = dto.SubjectName,
+                 SubjectName = dto.SubjectName?.Trim() ?? string.Empty,
                  Credits = dto.Credits,
-                 Description= dto.Description
+                 Description = dto.Description?.Trim() ?? string.Empty
              };
 
              _context.Subjects.Add(subject);

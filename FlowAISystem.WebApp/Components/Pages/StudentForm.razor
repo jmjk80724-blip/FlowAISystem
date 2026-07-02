@@ -5,6 +5,7 @@
 @using FlowAISystem.Core.Services
 @using FlowAISystem.Core.Services.Interfaces
 @using Microsoft.EntityFrameworkCore.Metadata.Internal
+@using FlowAISystem.WebApp.Validations
 @inject NavigationManager Navigation
 @inject IStudentService StudentService
 
@@ -78,11 +79,12 @@
     }
 
     private async Task HandleSubmit() {
-        if (string.IsNullOrWhiteSpace(student.FullName)) {
-            errorMessage = "Plear Entered student name!";
-            return;
-        }
-
+       
+       var error = StudentValidator.Validate(student);
+       if (error != null) {
+        errorMessage = error ;
+        return;
+       }
         try{
             if(Id == null) {
                 await StudentService.CreateAsync(student);

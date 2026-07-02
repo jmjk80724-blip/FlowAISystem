@@ -11,19 +11,19 @@ namespace FlowAISystem.Data.Entities
 
         [Required] // Full name is required
         [StringLength(100)] // Maximum length of 100 characters
-        public string FullName { get; set; } 
+        public string? FullName { get; set; } 
 
         [Required] // Date of birth is required
         public DateTime DateOfBirth { get; set; }
 
         [Required] // Gender is required
         [StringLength(10)] // Maximum length of 10 characters 
-        public string Gender { get; set; }
+        public string? Gender { get; set; }
 
         [Required]
         [StringLength(100)]
         [EmailAddress]
-        public string Email { get; set; }
+        public string? Email { get; set; }
 
         [Phone] // Validates that the input is a phone number
         [StringLength(20)]
