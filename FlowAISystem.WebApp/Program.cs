@@ -11,7 +11,7 @@ using Microsoft.IdentityModel.Tokens.Experimental;
 using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.WebHost.UseUrls("http://0.0.0.0:5222");
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 // ---Database postgre sql ---------
@@ -66,7 +66,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+
 app.UseStaticFiles();
 app.UseAntiforgery();
 
@@ -74,7 +74,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
-app.UseHttpsRedirection();
+
 
 app.UseAntiforgery();
 

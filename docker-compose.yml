@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    container_name: flowai_db
+    environment:
+      POSTGRES_DB: FlowAISystem
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Admine222
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+
+  webapp:
+    build:
+      context: .
+      dockerfile: FlowAISystem.WebApp/Dockerfile
+    container_name: flowai_webapp
+    ports:
+      - "8080:8080"
+    environment:
+     
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=FlowAISystem;Username=postgres;Password=Admine222;
+      - Jwt__Key=YourSuperSecretKeyMustBeAtLeast32Characters!
+      - Jwt__Issuer=FlowAISystem
+      - Jwt__Audience=FlowAISystemUsers
+   
+    depends_on:
+      - db
