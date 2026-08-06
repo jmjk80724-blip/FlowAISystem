@@ -2,28 +2,34 @@ version: '3.8'
 
 services:
   db:
-    image: postgres:15
-    container_name: flowai_db
-    environment:
-      POSTGRES_DB: FlowAISystem
+    container_name: flowaisystem-db
+    image: postgres:16
+    environment: 
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: Admine222
-    volumes:
-      - ./pgdata:/var/lib/postgresql/data
+      POSTGRES_DB:   flowaidb
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5433:5432"
+    volumes: 
+      - flowai_pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
 
-  webapp:
+  web:
     build:
       context: .
-      dockerfile: FlowAISystem.WebApp/Dockerfile
-    container_name: flowai_webapp
+    continer_name: flowaisystem-web
+    depends_on:
+      db:
+        condition: service_started
+    environment:
+        ASPNETCORE_ENVIRONMENT: Production
+        ConnectionStrings__DefaultConnection: Host=db;Port=5432;Database=flowaidb;Username=postgres;Password=${DB_PASSWORD}
+        Jwt__Key: ${JWT_KEY}
+        Jwt__Issuer: FlowAISystem
+        Jwt__Audience: FlowAISystemUsers
+    image: flowaisystem
     ports:
       - "8080:8080"
-    environment:
-     
-      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=FlowAISystem;Username=postgres;Password=Admine222;
-      - Jwt__Key=YourSuperSecretKeyMustBeAtLeast32Characters!
-      - Jwt__Issuer=FlowAISystem
-      - Jwt__Audience=FlowAISystemUsers
-   
-    depends_on:
-      - db
+    restart: unless-stopped
+volumes:  
+  flowai_pgdata:
