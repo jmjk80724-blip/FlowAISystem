@@ -1,0 +1,43 @@
+name: Build and Test FlowAISystem
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+   runs-on: ubuntu-latest
+
+
+cat > .github/workflows/build.yml << 'EDF'
+name: Build and Test FlowAISystem
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+   runs-on: ubuntu-latest
+
+   steps:
+   - name: Checkout code
+   - uses: actions/checkout@v4
+   
+   - name: Setup .NET
+   - uses: actions/setup-detnet@v4
+     with:
+       dotnet-version: '10.0.x'
+
+  - name: Restore dependencies
+    run: dotnet restore
+
+ - name: Build
+   run: dotnet build --no-restore
+
+ - name: Build Docker image
+   run: podman build -t flowaisystem:${{ github.sha }} .
