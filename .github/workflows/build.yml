@@ -1,4 +1,3 @@
-
 name: Build and Test FlowAISystem
 
 on:
@@ -9,22 +8,19 @@ on:
 
 jobs:
   build:
-   runs-on: ubuntu-latest
+    runs-on: ubuntu-latest
 
-   steps:
-   - name: Checkout code
-   - uses: actions/checkout@v4
-   
-   - name: Setup .NET
-   - uses: actions/setup-detnet@v4
-     with:
-       dotnet-version: '10.0.x'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-   - name: Restore dependencies
-     run: dotnet restore
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
 
-   - name: Build
-     run: dotnet build --no-restore
+      - name: Restore dependencies
+        run: dotnet restore
 
-   - name: Build Docker image
-     run: podman build -t flowaisystem:${{ github.sha }} .
+      - name: Build
+        run: dotnet build --no-restore
